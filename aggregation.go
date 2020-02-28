@@ -28,7 +28,22 @@ func getAggregatedRepo() (map[string]Repository, error) {
 	done := make(chan struct{})
 	defer close(done)
 
-	c := sumRepositories(done, *repoDtoList)
+	repoCh := loopThroughRepo(done, *repoDtoList)
+	c := make(chan result)
+	var wg sync.WaitGroup
+	const numWorker = 10
+	wg.Add(numWorker)
+	for i := 0; i < numWorker; i++ {
+		go func() {
+			worker(done, repoCh, c)
+			wg.Done()
+		}()
+	}
+	go func() {
+		wg.Wait()
+		close(c)
+	}()
+	// End of pipeline.
 
 	repoList := make(map[string]Repository)
 	for r := range c {
@@ -45,32 +60,39 @@ func getAggregatedRepo() (map[string]Repository, error) {
 	return repoList, nil
 }
 
-func sumRepositories(done <-chan struct{}, repoList []RepositoryGithubDto) <-chan result {
-	out := make(chan result)
+func worker(done <-chan struct{}, repositoriesDto <-chan RepositoryGithubDto, c chan<- result) {
+	for repoDto := range repositoriesDto {
+		languages, err := FetchLanguagesList(repoDto.Owner.OwnerName, repoDto.Name)
+		if err != nil {
+			return
+		}
+		repo := Repository{
+			Name:        repoDto.Name,
+			FullName:    repoDto.FullName,
+			Description: repoDto.Description,
+			OwnerName:   repoDto.Owner.OwnerName,
+			AvatarURL:   repoDto.Owner.AvatarURL,
+			Type:        repoDto.Owner.Type,
+			URL:         repoDto.URL,
+			Languages:   languages,
+		}
+
+		select {
+		case c <- result{repository: repo, err: err}:
+		case <-done:
+			return
+		}
+	}
+
+}
+
+func loopThroughRepo(done <-chan struct{}, repoList []RepositoryGithubDto) <-chan RepositoryGithubDto {
+	out := make(chan RepositoryGithubDto)
 
 	go func() {
-		var wg sync.WaitGroup
-
+		defer close(out)
 		for _, repoDto := range repoList {
-			wg.Add(1)
-			go func(repoDto RepositoryGithubDto) {
-				languages, err := fetchLanguagesList(repoDto.Owner.OwnerName, repoDto.Name)
-				repo := Repository{
-					Name:        repoDto.Name,
-					FullName:    repoDto.FullName,
-					Description: repoDto.Description,
-					OwnerName:   repoDto.Owner.OwnerName,
-					AvatarURL:   repoDto.Owner.AvatarURL,
-					Type:        repoDto.Owner.Type,
-					URL:         repoDto.URL,
-					Languages:   languages,
-				}
-				select {
-				case out <- result{repository: repo, err: err}:
-				case <-done:
-				}
-				wg.Done()
-			}(repoDto)
+			out <- repoDto
 
 			// Abort listing repositories if done is closed.
 			select {
@@ -80,14 +102,8 @@ func sumRepositories(done <-chan struct{}, repoList []RepositoryGithubDto) <-cha
 			default:
 				break
 			}
-		}
 
-		// listing is finish, so all calls to wg.Add are done.  Start a
-		// goroutine to close c once all the sends are done.
-		go func() {
-			wg.Wait()
-			close(out)
-		}()
+		}
 	}()
 	return out
 }
