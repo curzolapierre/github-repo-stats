@@ -23,7 +23,7 @@ func main() {
 	serverConfig = localServerConfig
 	quitCh := make(chan struct{})
 
-	Manager()
+	getAggregatedRepo()
 
 	quitCh <- struct{}{}
 }
