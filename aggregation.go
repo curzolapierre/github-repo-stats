@@ -31,7 +31,7 @@ func getAggregatedRepo() (map[string]Repository, error) {
 	repoCh := loopThroughRepo(done, *repoDtoList)
 	c := make(chan result)
 	var wg sync.WaitGroup
-	const numWorker = 10
+	numWorker := serverConfig.WorkerNumber
 	wg.Add(numWorker)
 	for i := 0; i < numWorker; i++ {
 		go func() {

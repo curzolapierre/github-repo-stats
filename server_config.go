@@ -16,6 +16,7 @@ import (
 type ServerConfig struct {
 	GithubAPIURL  string `json:"github_api_url"`
 	PersonalToken string `json:"personal_token"`
+	WorkerNumber  int    `json:"worker_number"`
 }
 
 // will load config file into path parameter
@@ -43,9 +44,10 @@ func (env *ServerConfig) Check() error {
 	var errorMessages []string
 	errChan := make(chan error)
 	wg := &sync.WaitGroup{}
-	wg.Add(1)
+	wg.Add(2)
 
 	go checkURL(wg, errChan, env.GithubAPIURL, "github_api_url")
+	go checkWorkerNumber(wg, errChan, env.WorkerNumber, "worker_number")
 
 	go func() {
 		wg.Wait()
@@ -67,5 +69,12 @@ func checkURL(wg *sync.WaitGroup, c chan error, raw string, name string) {
 	_, err := url.Parse(raw)
 	if err != nil {
 		c <- fmt.Errorf("%v is not a valid URL: %v", name, err)
+	}
+}
+
+func checkWorkerNumber(wg *sync.WaitGroup, c chan error, raw int, name string) {
+	defer wg.Done()
+	if raw <= 0 {
+		c <- fmt.Errorf("%v is not valid, need to be greater then 0", name)
 	}
 }

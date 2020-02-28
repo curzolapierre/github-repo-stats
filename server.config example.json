@@ -1,4 +1,5 @@
 {
 	"github_api_url": "https://api.github.com",
-	"personal_token": "github personal OAuth2 token"
+	"personal_token": "github personal OAuth2 token",
+	"worker_number": 10
 }
