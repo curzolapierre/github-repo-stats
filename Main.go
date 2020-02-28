@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 )
 
 var serverConfig *ServerConfig
@@ -21,9 +22,14 @@ func main() {
 		fmt.Println("github URL: ", localServerConfig.GithubAPIURL)
 	}
 	serverConfig = localServerConfig
-	quitCh := make(chan struct{})
+	// quitCh := make(chan struct{})
 
-	getAggregatedRepo()
+	_, err = getAggregatedRepo()
+	if err != nil {
+		log.Fatalln(err)
+	}
 
-	quitCh <- struct{}{}
+	// mux := http.NewServeMux()
+
+	// log.Println("Starting server on :8080...")
 }

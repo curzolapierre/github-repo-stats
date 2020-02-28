@@ -53,7 +53,7 @@ func sumRepositories(done <-chan struct{}, repoList []RepositoryGithubDto) <-cha
 
 		for _, repoDto := range repoList {
 			wg.Add(1)
-			go func() {
+			go func(repoDto RepositoryGithubDto) {
 				languages, err := fetchLanguagesList(repoDto.Owner.OwnerName, repoDto.Name)
 				repo := Repository{
 					Name:        repoDto.Name,
@@ -70,7 +70,7 @@ func sumRepositories(done <-chan struct{}, repoList []RepositoryGithubDto) <-cha
 				case <-done:
 				}
 				wg.Done()
-			}()
+			}(repoDto)
 
 			// Abort listing repositories if done is closed.
 			select {

@@ -24,7 +24,9 @@ func execRequest(method string, url string, payload interface{}) (*http.Response
 		req.Header.Add("Content-Type", "application/json")
 		req.Header.Add("Accept", "application/json")
 	}
-	req.Header.Set("Authorization", "token "+serverConfig.PersonalToken)
+	if serverConfig.PersonalToken != "" {
+		req.Header.Set("Authorization", "token "+serverConfig.PersonalToken)
+	}
 
 	return http.DefaultClient.Do(req)
 }
