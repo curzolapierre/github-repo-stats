@@ -41,7 +41,8 @@ func (repo *Repository) ContainsLanguage(searchedLanguage string) bool {
 	return false
 }
 
-func fetchRepositoriesList() (*[]RepositoryGithubDto, error) {
+// FetchRepositoriesList will fetch 100 first public repositories
+func FetchRepositoriesList() (*[]RepositoryGithubDto, error) {
 	body, err := FetchAPI("repositories")
 	if err != nil {
 		return nil, fmt.Errorf("Failed to fetch repositories", err)

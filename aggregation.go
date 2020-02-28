@@ -12,7 +12,7 @@ type result struct {
 }
 
 // Pipeline:
-// 3 stages
+// 2 stages
 // 1st: list repo to chan
 // 2nd: fetch languages
 
@@ -20,7 +20,7 @@ type result struct {
 func getAggregatedRepo() (map[string]Repository, error) {
 	start := time.Now()
 
-	repoDtoList, err := fetchRepositoriesList()
+	repoDtoList, err := FetchRepositoriesList()
 	if err != nil {
 		return nil, err
 	}
@@ -33,7 +33,7 @@ func getAggregatedRepo() (map[string]Repository, error) {
 	repoList := make(map[string]Repository)
 	for r := range c {
 		if r.err != nil {
-			fmt.Errorf("Error detect during fetching languages from repository", err)
+			fmt.Println("Error detect during fetching languages from repository", err)
 			continue
 		}
 		fmt.Println(r.repository)
@@ -75,7 +75,7 @@ func sumRepositories(done <-chan struct{}, repoList []RepositoryGithubDto) <-cha
 			// Abort listing repositories if done is closed.
 			select {
 			case <-done:
-				fmt.Errorf("listing repositories canceled")
+				fmt.Println("listing repositories canceled")
 				return
 			default:
 				break
@@ -143,7 +143,7 @@ func fetchAndTransferRepoToTheChan(done <-chan struct{}, in <-chan RepositoryGit
 
 	go func() {
 		for repoDto := range in {
-			languages, err := fetchLanguagesList(repoDto.Owner.OwnerName, repoDto.Name)
+			languages, err := FetchLanguagesList(repoDto.Owner.OwnerName, repoDto.Name)
 			if err != nil {
 				return
 			}

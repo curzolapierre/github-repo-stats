@@ -5,7 +5,8 @@ import (
 	"fmt"
 )
 
-func fetchLanguagesList(owner, repoName string) (map[string]float64, error) {
+// FetchLanguagesList will fetch list of languages by repository.
+func FetchLanguagesList(owner, repoName string) (map[string]float64, error) {
 	body, err := FetchAPI("repos/" + owner + "/" + repoName + "/languages")
 	if err != nil {
 		return nil, fmt.Errorf("Failed to fetch repositories", err)
