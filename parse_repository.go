@@ -20,7 +20,7 @@ type RepositoryGithubDto struct {
 }
 
 // Repositories structure of repository used and sent to the client
-type Repositories struct {
+type Repository struct {
 	Name        string
 	FullName    string
 	Description string
@@ -32,7 +32,7 @@ type Repositories struct {
 }
 
 // ContainsLanguage check if the current repository contains a searched language
-func (repo *Repositories) ContainsLanguage(searchedLanguage string) bool {
+func (repo *Repository) ContainsLanguage(searchedLanguage string) bool {
 	for lang := range repo.Languages {
 		if lang == searchedLanguage {
 			return true
@@ -52,5 +52,6 @@ func fetchRepositoriesList() (*[]RepositoryGithubDto, error) {
 		return nil, fmt.Errorf("Request returned bad JSON", err, "-", string(body))
 	}
 
+	fmt.Println("Fetched", len(*repositories), "repositories")
 	return repositories, nil
 }
