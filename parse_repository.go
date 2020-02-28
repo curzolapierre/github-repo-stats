@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"net/http"
 )
 
 // RepositoryGithubDto have important element from repositories list
@@ -20,6 +19,7 @@ type RepositoryGithubDto struct {
 	URL         string `json:"html_url"`
 }
 
+// Repositories structure of repository used and sent to the client
 type Repositories struct {
 	Name        string
 	FullName    string
@@ -31,37 +31,26 @@ type Repositories struct {
 	Languages   map[string]float64
 }
 
-func fetchRepositoriesList(w http.ResponseWriter, r *http.Request) (*[]RepositoryGithubDto, error) {
+// ContainsLanguage check if the current repository contains a searched language
+func (repo *Repositories) ContainsLanguage(searchedLanguage string) bool {
+	for lang := range repo.Languages {
+		if lang == searchedLanguage {
+			return true
+		}
+	}
+	return false
+}
+
+func fetchRepositoriesList() (*[]RepositoryGithubDto, error) {
 	body, err := FetchAPI("repositories")
 	if err != nil {
-		fmt.Errorf("Failed to fetch repositories", err)
-		return nil, err
+		return nil, fmt.Errorf("Failed to fetch repositories", err)
 	}
 	repositories := &[]RepositoryGithubDto{}
 	err = json.Unmarshal(body, &repositories)
 	if err != nil {
-		fmt.Errorf("Request returned bad JSON", err, "-", string(body))
-		return nil, err
+		return nil, fmt.Errorf("Request returned bad JSON", err, "-", string(body))
 	}
-	owner := (*repositories)[1].Owner.OwnerName
-	name := (*repositories)[1].Name
-	fmt.Println("Repository:")
-	fmt.Println("  → Name", (*repositories)[0].Name)
-	fmt.Println("  → FullName", (*repositories)[0].FullName)
-	fmt.Println("  → Description", (*repositories)[0].Description)
-	fmt.Println("  → AvatarURL", (*repositories)[0].Owner.AvatarURL)
-	fmt.Println("  → LanguageURL", (*repositories)[0].LanguageURL)
-	fmt.Println("  → OwnerName", (*repositories)[0].Owner.OwnerName)
-	fmt.Println("  → Type", (*repositories)[0].Owner.Type)
-	fmt.Println("  → URL", (*repositories)[0].URL)
 
-	languages, err := fetchLanguagesList(owner, name)
-	if err != nil {
-		fmt.Errorf("Error during fetching languages", err)
-		return nil, err
-	}
-	for name, size := range languages {
-		fmt.Println("languages:", name, size)
-	}
 	return repositories, nil
 }

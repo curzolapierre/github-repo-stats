@@ -2,18 +2,18 @@ package main
 
 import (
 	"encoding/json"
-	"log"
+	"fmt"
 )
 
 func fetchLanguagesList(owner, repoName string) (map[string]float64, error) {
 	body, err := FetchAPI("repos/" + owner + "/" + repoName + "/languages")
 	if err != nil {
-		log.Fatalln("Failed to fetch repositories:", err)
+		return nil, fmt.Errorf("Failed to fetch repositories", err)
 	}
 
 	var f interface{}
 	if err := json.Unmarshal(body, &f); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Error during fetching languages", err)
 	}
 
 	itemsMap := f.(map[string]interface{})
