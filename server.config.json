@@ -1,4 +1,4 @@
 {
 	"github_api_url": "https://api.github.com",
-	"worker_number": 100
+	"worker_number": 10
 }
