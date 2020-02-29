@@ -36,8 +36,14 @@ func execRequest(method string, url string, payload interface{}) (*http.Response
 func FetchAPI(endPoint string, params ...string) ([]byte, error) {
 
 	queryParam := "?"
+	first := true
 	for _, param := range params {
-		queryParam += param
+		if first {
+			queryParam += param
+			first = false
+		} else {
+			queryParam += "&" + param
+		}
 	}
 
 	url := serverConfig.GithubAPIURL + "/" + endPoint
@@ -45,8 +51,7 @@ func FetchAPI(endPoint string, params ...string) ([]byte, error) {
 		url += queryParam
 	}
 
-	// TODO(pg): streaming possibilities ?
-	resp, err := execRequest("GET", url, params)
+	resp, err := execRequest("GET", url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("Fail to get resource", err)
 	}

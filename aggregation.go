@@ -136,15 +136,6 @@ func getAggregatedRepo(querySearch ...string) (map[string]languageStats, error) 
 
 	elapsed := time.Since(start)
 
-	fmt.Println("\nfinal stats:")
-
-	for lang, stats := range languagesStats {
-		fmt.Println("\n	->", lang, "  count:", stats.Count, "  size:", stats.Size)
-		for name := range stats.RepoList {
-			fmt.Println("		-", name)
-		}
-	}
-
 	fmt.Printf("Fetch repositories with their languages list took %s", elapsed)
 	return languagesStats, nil
 }

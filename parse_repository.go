@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 )
 
 // RepositoryGithubDto have important element from repositories list
@@ -45,8 +46,18 @@ func (repo *Repository) ContainsLanguage(searchedLanguage string) bool {
 	return false
 }
 
-// FetchRepositoriesList will fetch 100 first public repositories
+// FetchRepositoriesList will fetch 100 last public repositories
 func FetchRepositoriesList(querySearch ...string) (*[]RepositoryGithubDto, error) {
+	// Github API doesn't offer possibility to fetch last created repositories
+	// To get them we have to set 'q' parameter, we search by date (D-1) and sort by stars arbitrary
+	// to activate order desc and to be sure to load 100 last repositories
+	// https://developer.github.com/v3/search/#search-repositories
+
+	if len(querySearch) < 1 {
+		yesterday := time.Now().AddDate(0, 0, -1).Format("2006-01-02")
+		querySearch = append(querySearch, "q=created:"+yesterday)
+	}
+	querySearch = append(querySearch, "order=desc", "sort=stars")
 	body, err := FetchAPI("search/repositories", querySearch...)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to fetch repositories", err)

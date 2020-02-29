@@ -31,7 +31,11 @@ func (p *Page) executeSearch() *map[string]languageStats {
 		}
 		return &repoStats
 	}
-	return nil
+	repoStats, err := getAggregatedRepo()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	return &repoStats
 }
 
 func makeHandler(httpFunction func(http.ResponseWriter, *http.Request)) http.HandlerFunc {
