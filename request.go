@@ -32,9 +32,21 @@ func execRequest(method string, url string, payload interface{}) (*http.Response
 }
 
 // FetchAPI execute GET request to Github API to fetch endPoint parameter
-func FetchAPI(endPoint string) ([]byte, error) {
+// params each element has to be already formated like key=value
+func FetchAPI(endPoint string, params ...string) ([]byte, error) {
+
+	queryParam := "?"
+	for _, param := range params {
+		queryParam += param
+	}
+
+	url := serverConfig.GithubAPIURL + "/" + endPoint
+	if len(params) > 0 {
+		url += queryParam
+	}
+
 	// TODO(pg): streaming possibilities ?
-	resp, err := execRequest("GET", serverConfig.GithubAPIURL+"/"+endPoint, nil)
+	resp, err := execRequest("GET", url, params)
 	if err != nil {
 		return nil, fmt.Errorf("Fail to get resource", err)
 	}

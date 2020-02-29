@@ -19,6 +19,10 @@ type RepositoryGithubDto struct {
 	URL         string `json:"html_url"`
 }
 
+type repositorySearchGithubDto struct {
+	Items []RepositoryGithubDto
+}
+
 // Repository structure of repository used and sent to the client
 type Repository struct {
 	Name        string
@@ -42,16 +46,18 @@ func (repo *Repository) ContainsLanguage(searchedLanguage string) bool {
 }
 
 // FetchRepositoriesList will fetch 100 first public repositories
-func FetchRepositoriesList() (*[]RepositoryGithubDto, error) {
-	body, err := FetchAPI("repositories")
+func FetchRepositoriesList(querySearch ...string) (*[]RepositoryGithubDto, error) {
+	body, err := FetchAPI("search/repositories", querySearch...)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to fetch repositories", err)
 	}
-	repositories := &[]RepositoryGithubDto{}
-	err = json.Unmarshal(body, &repositories)
+	repositoriesSearch := &repositorySearchGithubDto{}
+	err = json.Unmarshal(body, &repositoriesSearch)
 	if err != nil {
 		return nil, fmt.Errorf("Request returned bad JSON", err, "-", string(body))
 	}
+
+	repositories := &repositoriesSearch.Items
 
 	fmt.Println("Fetched", len(*repositories), "repositories")
 	return repositories, nil

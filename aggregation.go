@@ -12,9 +12,9 @@ type result struct {
 }
 
 type languageStats struct {
-	count    uint16
-	size     uint64
-	repoList map[string]Repository
+	Count    uint16
+	Size     uint64
+	RepoList map[string]Repository
 }
 
 func aggregateData(c chan result) map[string]languageStats {
@@ -29,19 +29,19 @@ func aggregateData(c chan result) map[string]languageStats {
 			// tmpRepoList use a map where key is unique 'full_name' field.
 			var tmpRepoList map[string]Repository
 
-			if aggregatedData[lang].repoList == nil {
+			if aggregatedData[lang].RepoList == nil {
 				tmpRepoList = make(map[string]Repository)
 			} else {
-				tmpRepoList = aggregatedData[lang].repoList
+				tmpRepoList = aggregatedData[lang].RepoList
 			}
 			tmpStats := &languageStats{
-				count:    aggregatedData[lang].count + 1,
-				size:     aggregatedData[lang].size + uint64(size),
-				repoList: tmpRepoList,
+				Count:    aggregatedData[lang].Count + 1,
+				Size:     aggregatedData[lang].Size + uint64(size),
+				RepoList: tmpRepoList,
 			}
 
 			aggregatedData[lang] = *tmpStats
-			aggregatedData[lang].repoList[r.repository.FullName] = r.repository
+			aggregatedData[lang].RepoList[r.repository.FullName] = r.repository
 		}
 	}
 
@@ -104,10 +104,10 @@ func loopThroughRepo(done <-chan struct{}, repoList []RepositoryGithubDto) <-cha
 // 		- aggregate repo: map[language: string]{count: number, size: number, map: Repository}
 
 // getAggregatedRepo will fetch public repositories, their languages then call worker to aggregate those data
-func getAggregatedRepo() (map[string]languageStats, error) {
+func getAggregatedRepo(querySearch ...string) (map[string]languageStats, error) {
 	start := time.Now()
 
-	repoDtoList, err := FetchRepositoriesList()
+	repoDtoList, err := FetchRepositoriesList(querySearch...)
 	if err != nil {
 		return nil, err
 	}
@@ -139,8 +139,8 @@ func getAggregatedRepo() (map[string]languageStats, error) {
 	fmt.Println("\nfinal stats:")
 
 	for lang, stats := range languagesStats {
-		fmt.Println("\n	->", lang, "  count:", stats.count, "  size:", stats.size)
-		for name := range stats.repoList {
+		fmt.Println("\n	->", lang, "  count:", stats.Count, "  size:", stats.Size)
+		for name := range stats.RepoList {
 			fmt.Println("		-", name)
 		}
 	}

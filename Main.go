@@ -25,10 +25,6 @@ func main() {
 	mux.HandleFunc("/", makeHandler(indexHandler))
 	mux.HandleFunc("/index", makeHandler(indexHandler))
 	mux.HandleFunc("/search/", makeHandler(searchHandler))
-	// _, err = getAggregatedRepo()
-	// if err != nil {
-	// 	log.Fatalln(err)
-	// }
 
 	log.Println("Starting server on :8080...")
 	err = http.ListenAndServe(":8080", mux)

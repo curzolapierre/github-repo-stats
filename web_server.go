@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"regexp"
 	"text/template"
@@ -20,7 +22,21 @@ type Page struct {
 
 func (p *Page) executeSearch() {
 	if p.Body != nil && string(p.Body) != "" {
-		fmt.Println("query search:", string(p.Body))
+		repoName := string(p.Body)
+		fmt.Println("query search:", repoName)
+
+		params := "q=" + repoName
+		repoStats, err := getAggregatedRepo(params)
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		var jsonData []byte
+		jsonData, err = json.Marshal(repoStats)
+		if err != nil {
+			log.Println(err)
+		}
+		p.Body = jsonData
 	}
 }
 
@@ -57,7 +73,14 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 	// 	return
 	// }
 	// http.Redirect(w, r, "/search/", http.StatusFound)
-	renderTemplate(w, "search", p)
+	w.Header().Set("Content-Type", "application/json")
+	// jsonObj, err := json.Marshal(p)
+	// if err != nil {
+	// 	http.Error(w, err.Error(), http.StatusInternalServerError)
+	// }
+
+	w.Write(p.Body)
+	// renderTemplate(w, "search", p)
 }
 
 func errorHandler(w http.ResponseWriter, r *http.Request) {
