@@ -7,11 +7,10 @@
 
   <h4>return back to[<a href="/">Search page</a>]</h3>
 
-
   {{ range $lang, $stats := . }}
   <br>
   <br>
-  <h6><b>{{ $lang }}</b>&nbsp;&nbsp;Size: [{{ $stats.Size }}]</h3>
+  <h6><b>{{ $lang }}</b>&nbsp;&nbsp;Size: <b>{{ $stats.Size }}</b>&nbsp;&nbsp;Total: <b>{{ $stats.Count }} {{RepoList}}</b></h3>
   <div class="table-responsive-md">
     <table class="table">
       <thead>

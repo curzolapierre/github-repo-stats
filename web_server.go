@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"regexp"
@@ -13,24 +12,26 @@ var templates = template.Must(template.ParseFiles(
 	"./template/index.html",
 	"./template/search.html"))
 
+type inputPage struct {
+	RepoName     []byte
+	languageName []byte
+}
+
 // Page structure handle variables sent to client
 type Page struct {
 	Body []byte
 }
 
-func (p *Page) executeSearch() *map[string]languageStats {
-	if p.Body != nil && string(p.Body) != "" {
-		repoName := string(p.Body)
-		fmt.Println("query search:", repoName)
+func executeSearch(repoName, languageName string) *map[string]languageStats {
+	params := "q="
 
-		params := "q=" + repoName
-		repoStats, err := getAggregatedRepo(params)
-		if err != nil {
-			log.Fatalln(err)
-		}
-		return &repoStats
+	if repoName != "" {
+		params += "in:name+" + repoName + "+"
 	}
-	repoStats, err := getAggregatedRepo()
+	if languageName != "" {
+		params += "language:" + languageName
+	}
+	repoStats, err := getAggregatedRepo(params)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -62,8 +63,8 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 
 func searchHandler(w http.ResponseWriter, r *http.Request) {
 	repoName := r.FormValue("repoName")
-	p := &Page{Body: []byte(repoName)}
-	repo := p.executeSearch()
+	languageName := r.FormValue("languageName")
+	repo := executeSearch(repoName, languageName)
 
 	renderTemplate(w, "search", repo)
 }
