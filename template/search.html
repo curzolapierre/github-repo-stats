@@ -1,13 +1,41 @@
 <head>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
-        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+    integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 </head>
 
-<body>
+<body style="width: 90%; margin: auto;">
 
-    <p>return back to[<a href="/">Search page</a>]</p>
+  <h4>return back to[<a href="/">Search page</a>]</h3>
 
-    <div>{{printf "%s" .Body}}</div>
 
+  {{ range $lang, $stats := . }}
+  <br>
+  <br>
+  <h6><b>{{ $lang }}</b>&nbsp;&nbsp;Size: [{{ $stats.Size }}]</h3>
+  <div class="table-responsive-md">
+    <table class="table">
+      <thead>
+        <tr>
+          <th scope="col">Size</th>
+          <th scope="col">Name</th>
+          <th scope="col">Description</th>
+          <th scope="col">URL</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{ range $name, $repo := $stats.RepoList }}
+        <tr>
+          <th scope="row">{{ index $repo.Languages $lang }}</th>
+          <td>{{ $name }}</td>
+          <td>{{ $repo.Description }}</td>
+          <td>
+            <a href="{{ $repo.URL }}">Link</a>
+          </td>
+        </tr>
+        {{ end }}
+      </tbody>
+    </table>
+  </div>
+  {{ end }}
 
 </body>

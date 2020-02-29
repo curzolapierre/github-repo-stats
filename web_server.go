@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -20,7 +19,7 @@ type Page struct {
 	Body []byte
 }
 
-func (p *Page) executeSearch() {
+func (p *Page) executeSearch() *map[string]languageStats {
 	if p.Body != nil && string(p.Body) != "" {
 		repoName := string(p.Body)
 		fmt.Println("query search:", repoName)
@@ -30,14 +29,9 @@ func (p *Page) executeSearch() {
 		if err != nil {
 			log.Fatalln(err)
 		}
-
-		var jsonData []byte
-		jsonData, err = json.Marshal(repoStats)
-		if err != nil {
-			log.Println(err)
-		}
-		p.Body = jsonData
+		return &repoStats
 	}
+	return nil
 }
 
 func makeHandler(httpFunction func(http.ResponseWriter, *http.Request)) http.HandlerFunc {
@@ -51,7 +45,7 @@ func makeHandler(httpFunction func(http.ResponseWriter, *http.Request)) http.Han
 	}
 }
 
-func renderTemplate(w http.ResponseWriter, template string, p *Page) {
+func renderTemplate(w http.ResponseWriter, template string, p interface{}) {
 	err := templates.ExecuteTemplate(w, template+".html", p)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -66,21 +60,9 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 func searchHandler(w http.ResponseWriter, r *http.Request) {
 	repoName := r.FormValue("repoName")
 	p := &Page{Body: []byte(repoName)}
-	p.executeSearch()
-	// err := p.executeSearch()
-	// if err != nil {
-	// 	http.Error(w, err.Error(), http.StatusInternalServerError)
-	// 	return
-	// }
-	// http.Redirect(w, r, "/search/", http.StatusFound)
-	w.Header().Set("Content-Type", "application/json")
-	// jsonObj, err := json.Marshal(p)
-	// if err != nil {
-	// 	http.Error(w, err.Error(), http.StatusInternalServerError)
-	// }
+	repo := p.executeSearch()
 
-	w.Write(p.Body)
-	// renderTemplate(w, "search", p)
+	renderTemplate(w, "search", repo)
 }
 
 func errorHandler(w http.ResponseWriter, r *http.Request) {
