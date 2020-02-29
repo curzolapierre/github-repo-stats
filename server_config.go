@@ -19,7 +19,7 @@ type ServerConfig struct {
 	WorkerNumber  int    `json:"worker_number"`
 }
 
-// will load config file into path parameter
+// will load config file from path
 // If no file found no error will be returned, project can work without
 func loadConfigFile(path string) (*ServerConfig, error) {
 	file, err := ioutil.ReadFile(path)
@@ -44,10 +44,11 @@ func (env *ServerConfig) Check() error {
 	var errorMessages []string
 	errChan := make(chan error)
 	wg := &sync.WaitGroup{}
-	wg.Add(2)
+	wg.Add(3)
 
 	go checkURL(wg, errChan, env.GithubAPIURL, "github_api_url")
 	go checkWorkerNumber(wg, errChan, env.WorkerNumber, "worker_number")
+	go checkAPICredentials(wg, errChan, env.PersonalToken, "personal_token")
 
 	go func() {
 		wg.Wait()
@@ -67,7 +68,7 @@ func (env *ServerConfig) Check() error {
 func checkURL(wg *sync.WaitGroup, c chan error, raw string, name string) {
 	defer wg.Done()
 	_, err := url.Parse(raw)
-	if err != nil {
+	if err != nil || raw == "" {
 		c <- fmt.Errorf("%v is not a valid URL: %v", name, err)
 	}
 }
@@ -76,5 +77,12 @@ func checkWorkerNumber(wg *sync.WaitGroup, c chan error, raw int, name string) {
 	defer wg.Done()
 	if raw <= 0 {
 		c <- fmt.Errorf("%v is not valid, need to be greater then 0", name)
+	}
+}
+
+func checkAPICredentials(wg *sync.WaitGroup, c chan error, raw string, name string) {
+	defer wg.Done()
+	if raw == "" {
+		c <- fmt.Errorf("%v is empty, you can increase the rate limit when this field is filled in. See README.md", name)
 	}
 }

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 )
@@ -12,12 +11,16 @@ func main() {
 	localServerConfig, err := loadConfigFile("./server.config.json")
 	if err != nil {
 		log.Fatalln("Error during loading config file:", err)
+	}
+	cred, err := loadConfigFile("./credentials.json")
+	if err != nil {
+		log.Print("Error during loading credentials file:", err)
 	} else {
+		localServerConfig.PersonalToken = cred.PersonalToken
 		err = localServerConfig.Check()
 		if err != nil {
-			log.Fatalf("Errors in config file:\n%v\n", err)
+			log.Fatalf("Errors in config files:\n%v\n", err)
 		}
-		fmt.Println("github URL: ", localServerConfig.GithubAPIURL)
 	}
 	serverConfig = localServerConfig
 
