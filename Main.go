@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"net/http"
 )
 
 var serverConfig *ServerConfig
@@ -19,14 +20,17 @@ func main() {
 		fmt.Println("github URL: ", localServerConfig.GithubAPIURL)
 	}
 	serverConfig = localServerConfig
-	// quitCh := make(chan struct{})
 
-	_, err = getAggregatedRepo()
-	if err != nil {
-		log.Fatalln(err)
-	}
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", makeHandler(indexHandler))
+	mux.HandleFunc("/index", makeHandler(indexHandler))
+	mux.HandleFunc("/search/", makeHandler(searchHandler))
+	// _, err = getAggregatedRepo()
+	// if err != nil {
+	// 	log.Fatalln(err)
+	// }
 
-	// mux := http.NewServeMux()
-
-	// log.Println("Starting server on :8080...")
+	log.Println("Starting server on :8080...")
+	err = http.ListenAndServe(":8080", mux)
+	log.Fatal(err)
 }
