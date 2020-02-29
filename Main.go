@@ -25,6 +25,9 @@ func main() {
 	mux.HandleFunc("/", makeHandler(indexHandler))
 	mux.HandleFunc("/index", makeHandler(indexHandler))
 	mux.HandleFunc("/search/", makeHandler(searchHandler))
+	mux.HandleFunc("/query/", makeHandler(queryHandler))
+
+	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
 	log.Println("Starting server on :8080...")
 	err = http.ListenAndServe(":8080", mux)

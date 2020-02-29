@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"regexp"
@@ -11,9 +12,9 @@ import (
 
 var validPath = regexp.MustCompile("^/|(index|error|search)|/([a-zA-Z0-9]+)$")
 var templates = template.Must(template.ParseFiles(
-	"./template/index.html",
-	"./template/search.html",
-	"./template/error.html"))
+	"template/index.html",
+	"template/search.html",
+	"template/error.html"))
 
 // Page structure handle variables sent to client
 type Page struct {
@@ -64,23 +65,52 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func searchHandler(w http.ResponseWriter, r *http.Request) {
-	repoName := r.FormValue("repoName")
-	p := &Page{Body: []byte(repoName)}
-	p.executeSearch()
+	query := r.FormValue("repoName")
+	p := &Page{Body: []byte(query)}
 	// err := p.executeSearch()
 	// if err != nil {
 	// 	http.Error(w, err.Error(), http.StatusInternalServerError)
 	// 	return
 	// }
 	// http.Redirect(w, r, "/search/", http.StatusFound)
+	// w.Header().Set("Content-Type", "application/json")
+
+	// w.Write(p.Body)
+	renderTemplate(w, "search", p)
+}
+
+func queryHandler(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method != "POST" {
+		w.Write([]byte("nothing to do"))
+		return
+	}
+	type bodyReader struct {
+		QuerySearch string `json:"querySearch"`
+	}
+	body, err := ioutil.ReadAll(r.Body)
+	fmt.Println("data receive from request", string(body))
+	data := bodyReader{}
+
+	if err != nil {
+		fmt.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	err = json.Unmarshal([]byte(body), &data)
+
+	if err != nil {
+		fmt.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	fmt.Println("data receive from request", data)
+	p := &Page{Body: []byte(data.QuerySearch)}
+	p.executeSearch()
+
 	w.Header().Set("Content-Type", "application/json")
-	// jsonObj, err := json.Marshal(p)
-	// if err != nil {
-	// 	http.Error(w, err.Error(), http.StatusInternalServerError)
-	// }
 
 	w.Write(p.Body)
-	// renderTemplate(w, "search", p)
 }
 
 func errorHandler(w http.ResponseWriter, r *http.Request) {
