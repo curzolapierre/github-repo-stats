@@ -8,11 +8,10 @@ import (
 	"text/template"
 )
 
-var validPath = regexp.MustCompile("^/|(index|error|search)|/([a-zA-Z0-9]+)$")
+var validPath = regexp.MustCompile("^/|(index|search)|/([a-zA-Z0-9]+)$")
 var templates = template.Must(template.ParseFiles(
 	"./template/index.html",
-	"./template/search.html",
-	"./template/error.html"))
+	"./template/search.html"))
 
 // Page structure handle variables sent to client
 type Page struct {
