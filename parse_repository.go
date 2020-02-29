@@ -19,7 +19,7 @@ type RepositoryGithubDto struct {
 	URL         string `json:"html_url"`
 }
 
-// Repositories structure of repository used and sent to the client
+// Repository structure of repository used and sent to the client
 type Repository struct {
 	Name        string
 	FullName    string
