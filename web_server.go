@@ -23,17 +23,21 @@ type Page struct {
 }
 
 func executeSearch(repoName, languageName string) *map[string]languageStats {
-	params := "q="
+	var params string
 
 	if repoName != "" {
-		params += "in:name+" + repoName + "+"
+		params = "q=in:name+" + repoName + "+"
 	}
 	if languageName != "" {
-		params += "language:" + languageName
+		if params == "" {
+			params = "q=language:" + languageName
+		} else {
+			params += "language:" + languageName
+		}
 	}
 	repoStats, err := getAggregatedRepo(params)
 	if err != nil {
-		log.Fatalln(err)
+		log.Print(err)
 	}
 	return &repoStats
 }

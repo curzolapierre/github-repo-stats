@@ -53,7 +53,7 @@ func FetchRepositoriesList(querySearch ...string) (*[]RepositoryGithubDto, error
 	// to activate order desc and to be sure to load 100 last repositories
 	// https://developer.github.com/v3/search/#search-repositories
 
-	if len(querySearch) < 1 {
+	if len(querySearch) <= 1 && querySearch[0] == "" {
 		yesterday := time.Now().AddDate(0, 0, -1).Format("2006-01-02")
 		querySearch = append(querySearch, "q=created:"+yesterday)
 	}
