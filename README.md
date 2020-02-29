@@ -14,6 +14,13 @@ That's it, you've build the latest version of the github repository project (the
 
 To fully exploit the project, you'll need to create the config file `./credentials.json` and set the `personal_token` value with a `Personal access tokens` (you can create it [here](https://github.com/settings/tokens)). Use `./credentials.example.json` as template.
 
+## How to run it
+
+From `$GOPATH/src/github.com/curzolapierre/github-repo-stats`:
+
+- you have to execute binary present in `$GOPATH/bin/github-repo-stats`
+- Or execute the command `go install` then run `./github-repo-stats`
+
 ## How it works
 
 First a request will be made to fetch repositories according to user input

@@ -9,8 +9,8 @@ import (
 
 var validPath = regexp.MustCompile("^/|(index|search)|/([a-zA-Z0-9]+)$")
 var templates = template.Must(template.ParseFiles(
-	"./template/index.html",
-	"./template/search.html"))
+	"template/index.html",
+	"template/search.html"))
 
 type inputPage struct {
 	RepoName     []byte
