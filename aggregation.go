@@ -101,7 +101,7 @@ func loopThroughRepo(done <-chan struct{}, repoList []RepositoryGithubDto) <-cha
 // 1st: list repo to chan
 // 2nd:
 //		- fetch languages
-// 		- aggregate repo: map[language: string]{count: number, size: number}
+// 		- aggregate repo: map[language: string]{count: number, size: number, map: Repository}
 
 // getAggregatedRepo will fetch public repositories, their languages then call worker to aggregate those data
 func getAggregatedRepo() (map[string]languageStats, error) {
